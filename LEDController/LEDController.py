@@ -4,6 +4,7 @@ import cv2 as cv
 
 try:
 	import RPI.GPIO as gpio
+	#really dumb
 	gpioActive = True
 	#set pins
 	rCh = 20
