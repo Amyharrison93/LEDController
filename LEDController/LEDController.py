@@ -63,6 +63,18 @@ blank = b - b
 intAudioRange = 20000 # 20KHz
 intAlias = int(16777215/intAudioRange)
 
+try:
+	p = pyaudio.PyAudio()
+
+	stream = p.open(format=FORMAT,
+					channels=CHANNELS,
+					rate=RATE,
+					input=True,
+					frames_per_buffer=CHUNK)
+	devIn += "AUDIO"
+except:
+	print("no audio device")
+
 while True:
 	if "CAMERA" in devIn:
 		#read frame and split colour channels
