@@ -107,11 +107,12 @@ while True:
 		sh.set_pixels(backLight)
 		#print (r,g,b)
 		
-	
-	#troubleshooting
-	backlight = cv.merge((blank+b, blank+g, blank+r))
-	cv.imshow('img', frame)
-	cv.imshow('backlight', backlight)
+	try:
+		#troubleshooting
+		backlight = cv.merge((blank+b, blank+g, blank+r))
+		cv.imshow('img', frame)
+		cv.imshow('backlight', backlight)
+	except:
+		print("Cannot show troubleshooting")
+
 	cv.waitKey(5)
-
-
