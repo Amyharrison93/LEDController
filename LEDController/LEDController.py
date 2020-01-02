@@ -64,6 +64,11 @@ intAudioRange = 20000 # 20KHz
 intAlias = int(16777215/intAudioRange)
 
 try:
+	CHUNK = 1024
+	FORMAT = pyaudio.paInt16
+	CHANNELS = 2
+	RATE = 44100
+
 	p = pyaudio.PyAudio()
 
 	stream = p.open(format=FORMAT,
@@ -72,6 +77,7 @@ try:
 					input=True,
 					frames_per_buffer=CHUNK)
 	devIn += "AUDIO"
+
 except:
 	print("no audio device")
 
@@ -88,7 +94,8 @@ while True:
 
 	if "AUDIO" in devIn:
 		#read audio device
-		inAaudio = audioDevice
+		inAaudio = stream.read(CHUNK)
+
 		hexColour = inAudio%intAlias
 		#convert hex to RGB
 		h = input('Enter hex: ').lstrip('#')
@@ -127,4 +134,4 @@ while True:
 	except:
 		print("Cannot show troubleshooting")
 
-	cv.waitKey(5)
+	cv.waitKey(1)
