@@ -2,6 +2,8 @@
 import numpy as np
 import cv2 as cv 
 
+devIn = ""
+
 try:
 	import RPI.GPIO as gpio
 	#really dumb
@@ -26,6 +28,7 @@ except:
 	gpioActive = False
 
 try:
+	import pyaudio
 	from sense_hat import SenseHat
 	sh = SenseHat()
 	sh.clear
@@ -51,19 +54,33 @@ cam = cv.VideoCapture(1)
 
 #read image for framer size and create blank for troubleshooting
 ret, frame = cam.read()
+if ret == True:
+	devIn += "CAMERA"
 b,g,r = cv.split(frame)
 blank = b - b
 
+#audio properties
+intAudioRange = 20000 # 20KHz
+intAlias = int(16777215/intAudioRange)
+
 while True:
-	#read frame and split colour channels
-	ret, frame = cam.read()
-	blue,green,red = cv.split(frame)
-	
-	#average colour channels
-	b = int(np.mean(blue))
-	g = int(np.mean(green))
-	r = int(np.mean(red))
-	#print red, green, blue
+	if "CAMERA" in devIn:
+		#read frame and split colour channels
+		ret, frame = cam.read()
+		imgBlue,imgGreen,imgRed = cv.split(frame)
+
+		#average colour channels
+		b = int(np.mean(imgBlue))
+		g = int(np.mean(imgGreen))
+		r = int(np.mean(imgRed))
+
+	if "AUDIO" in devIn:
+		#read audio device
+		inAaudio = audioDevice
+		hexColour = inAudio%intAlias
+		#convert hex to RGB
+		h = input('Enter hex: ').lstrip('#')
+		R, G, B = tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
 	
 	#output average to LED controller
 	if gpioActive == True:
@@ -71,6 +88,7 @@ while True:
 		redCh.start(100)
 		greenCh.start(1)
 		blueCh.start(1)
+
 		#change the duty cycle for different colours
 		redCh.ChangeDutyCycle(r)
 		greenCh.ChangeDutyCycle(g)
