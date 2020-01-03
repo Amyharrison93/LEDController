@@ -7,13 +7,23 @@ strDevIn = ""
 #-----------------------------------------------------------------------
 #      	bluetooth setup v0.2
 # 		initialises bluetooth while checking if devices are accessable
-#		started: 17/12/2019 updated: 03/01/2020
+#		started: 17/12/2019 updated: 03/01/2020 
+#		Comp tested: 03/01/2020
 #		Author: AH
 #-----------------------------------------------------------------------
 def BluetoothSetup(strDevIn):
 	try:
 		import bluetooth as bt
-		strstrDevIn += " BLUETOOTH"
+		arryDevices = bt.discover_devices(lookup_names = True)
+
+		#compare with known device(create a config for this later)
+		arryKnownDevice = "D4:11:A3:96:D0:AA", "What's a phone"
+
+		#check if the known device is found
+		for intCount in range(0, len(arryDevices)):
+			if arryDevices[intCount] == arryKnownDevice:
+			strDevIn += " BLUETOOTH"
+
 	except:
 		print("Bluetooth setup failed")
 	return strDevIn
@@ -21,7 +31,8 @@ def BluetoothSetup(strDevIn):
 #-----------------------------------------------------------------------
 #      	audio setup v0.2
 # 		initialises the audio while checking if audio is accessable
-#		started: 17/12/2019 updated: 03/01/2020
+#		started: 17/12/2019 updated: 03/01/2020 
+#		comp tested:
 #		Author: AH
 #-----------------------------------------------------------------------
 def AudioSetup(strDevIn):
@@ -49,6 +60,7 @@ def AudioSetup(strDevIn):
 #      	GPIO setup v0.2
 # 		initialises the GPIO while checking if GPIO are accessable
 #		started: 17/12/2019 updated: 03/01/2020
+#		comp tested:
 #		Author: AH
 #-----------------------------------------------------------------------
 def GPIOSetup():
@@ -81,6 +93,7 @@ def GPIOSetup():
 # 		initialises the sense hat while checking if 
 # 		devices are accessable
 #		started: 17/12/2019 updated: 03/01/2020
+#		comp tested:
 #		Author: AH
 #-----------------------------------------------------------------------
 def SenseHatSetup(strDevIn):
@@ -106,7 +119,8 @@ def SenseHatSetup(strDevIn):
 #-----------------------------------------------------------------------
 #      	Camera setup v0.1
 # 		initialises camera and checks for connection 
-#		started: 03/01/2020 updated: 
+#		started: 03/01/2020 updated:
+#		comp tested:03/02/2020 
 #		Author: AH
 #-----------------------------------------------------------------------
 def CameraSetup(strDevIn):
@@ -166,8 +180,6 @@ while True:
 			boolOnState = False
 	else:
 		boolOnState = False
-
-	print(boolOnState)
 	
 	if "BLUETOOTH" in strDevIn:
 		print("")
@@ -228,5 +240,6 @@ while True:
 			cv.imshow('backlight', backlight)
 		except:
 			print("Cannot show troubleshooting")
+		print("loop complete")
 	#adjust for higher/lower bitrates 
 	cv.waitKey(1)
