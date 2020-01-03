@@ -1,8 +1,22 @@
 #!/usr/bin/env python3
 import numpy as np
 import cv2 as cv 
+import os
 
 strDevIn = ""
+#-----------------------------------------------------------------------
+#      	raspotify setup v0.2
+# 		initialises rasppotify to ensure service is running
+#		started: 03/01/2020 
+#		Comp tested: 03/01/2020
+#		Author: AH
+#-----------------------------------------------------------------------
+def ServiceStart(strService = raspotify):
+	try:
+		strCommand = "sudo systemctl restart {0}".format(strService)
+		os.system(strCommand)
+	except:
+		print("service failed to start")
 
 #-----------------------------------------------------------------------
 #      	bluetooth setup v0.2
@@ -141,6 +155,9 @@ def CameraSetup(strDevIn):
 #		Author: AH
 #-----------------------------------------------------------------------
 def Setup(strDevIn):
+	
+	ServiceStart()
+
 	strDevIn = BluetoothSetup(strDevIn)
 	strDevIn = AudioSetup(strDevIn)
 	strDevIn = GPIOSetup(strDevIn)
