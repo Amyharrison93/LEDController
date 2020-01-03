@@ -11,7 +11,7 @@ strDevIn = ""
 #-----------------------------------------------------------------------
 def BluetoothSetup(strDevIn):
 	try:
-		import pybluez
+		import bluetooth as bt
 		strstrDevIn += " BLUETOOTH"
 	except:
 		print("Bluetooth setup failed")
@@ -55,13 +55,16 @@ def GPIOSetup():
 		import RPI.GPIO as gpio
 		strDevIn += " GPIO"
 		#set pins
-		rCh = 20
-		bCh = 21
-		gCh = 22
-		#set mode
-		gpio.setup(rCh,gpio.OUT)
-		gpio.setup(gCh,gpio.OUT)
-		gpio.setup(bCh,gpio.OUT)
+		rCh = 12
+		bCh = 13
+		gCh = 18
+		switch = 15
+		#set mode out
+		gpio.setup(rCh,GPIO.OUT)
+		gpio.setup(gCh,GPIO.OUT)
+		gpio.setup(bCh,GPIO.OUT)
+		#set mode in 
+		gpio.setup(switch, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 		#set frequency of pwm
 		pwmFreq = 255
 		#define pwm for pins
@@ -133,15 +136,20 @@ def Setup(strDevIn):
 	return strDevIn
 
 #frame properties
-if "CAMERA" in devIn:
+if "CAMERA" in strDevIn:
 	ret, frame = cam.read()
 	b,g,r = cv.split(frame)
 	blank = b - b
 
 #audio properties 20 Hz - 20KHz to Hex
-if "AUDIO" in devIn:
+if "AUDIO" in strDevIn:
 	intAudioRange = 20000 - 20
 	intAlias = int(16777215/intAudioRange)
+
+#bluetooth properties
+if "BLUETOOTH" in strDevIn:
+
+
 
 #-----------------------------------------------------------------------
 #      	Main v0.3
@@ -150,59 +158,69 @@ if "AUDIO" in devIn:
 #		Author: AH
 #-----------------------------------------------------------------------
 while True:
-	if "CAMERA" in strDevIn:
-		#read frame and split colour channels
-		ret, frame = cam.read()
-		imgBlue,imgGreen,imgRed = cv.split(frame)
-
-		#average colour channels
-		b = int(np.mean(imgBlue))
-		g = int(np.mean(imgGreen))
-		r = int(np.mean(imgRed))
-
-	if "AUDIO" in strDevIn:
-		#read audio device
-		inAaudio = stream.read(CHUNK)
-
-		hexColour = inAudio%intAlias
-		#convert hex to RGB
-		h = input('Enter hex: ').lstrip('#')
-		R, G, B = tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
-	
-
+	#on, off flag
 	if "GPIO" in strDevIn:
-		#pwm for analogue output
-		redCh.start(100)
-		greenCh.start(1)
-		blueCh.start(1)
-
-		#change the duty cycle for different colours
-		redCh.ChangeDutyCycle(r)
-		greenCh.ChangeDutyCycle(g)
-		blueCh.ChangeDutyCycle(b)
-	
+		if GPIO.event_detected(switch, GPIO.RISING):
+			boolOnState = True
+		if GPIO.event_detected(switch, GPIO.FALLING):
+			boolOnState = False
 	if "BLUETOOTH" in strDevIn:
-		#do bluetooth stuff plz
+
+
+	if boolOnState == True:
+		if "CAMERA" in strDevIn:
+			#read frame and split colour channels
+			ret, frame = cam.read()
+			imgBlue,imgGreen,imgRed = cv.split(frame)
+
+			#average colour channels
+			b = int(np.mean(imgBlue))
+			g = int(np.mean(imgGreen))
+			r = int(np.mean(imgRed))
+
+		if "AUDIO" in strDevIn:
+			#read audio device
+			inAaudio = stream.read(CHUNK)
+
+			hexColour = inAudio%intAlias
+			#convert hex to RGB
+			h = input('Enter hex: ').lstrip('#')
+			R, G, B = tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
 	
-	if "SENSE-HAT" in strDevIn:
-		#output colour to sense hat LED matrix 
-		sh.set_pixels(backLight)
-		backLight = np.array([
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b]])
+
+		if "GPIO" in strDevIn:
+			#pwm for analogue output (this is probably not correct)
+			redCh.start(100)
+			greenCh.start(1)
+			blueCh.start(1)
+
+			#change the duty cycle for different colours
+			redCh.ChangeDutyCycle(r)
+			greenCh.ChangeDutyCycle(g)
+			blueCh.ChangeDutyCycle(b)
 	
-	try:
-		#troubleshooting
-		backlight = cv.merge((blank+b, blank+g, blank+r))
-		cv.imshow('image frame', frame)
-		cv.imshow('backlight', backlight)
-	except:
-		print("Cannot show troubleshooting")
+		if "BLUETOOTH" in strDevIn:
+			#do bluetooth stuff plz
+	
+		if "SENSE-HAT" in strDevIn:
+			#output colour to sense hat LED matrix
+			sh.set_pixels(backLight)
+			backLight = np.array([
+				[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
+				[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
+				[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
+				[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
+				[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
+				[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
+				[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
+				[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b]])
+	
+		#troubleshooting only, not required for runtime (will likely fail in headless)
+		try:
+			backlight = cv.merge((blank+b, blank+g, blank+r))
+			cv.imshow('image frame', frame)
+			cv.imshow('backlight', backlight)
+		except:
+			print("Cannot show troubleshooting")
 	#adjust for higher/lower bitrates 
 	cv.waitKey(1)
