@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
+import cv2 as cv 
 
 strDevIn = ""
 
@@ -82,7 +83,7 @@ def GPIOSetup():
 #		started: 17/12/2019 updated: 03/01/2020
 #		Author: AH
 #-----------------------------------------------------------------------
-def SenseHatSetup(strDevIn)
+def SenseHatSetup(strDevIn):
 	try:
 		from sense_hat import SenseHat
 		sh = SenseHat()
@@ -110,7 +111,6 @@ def SenseHatSetup(strDevIn)
 #-----------------------------------------------------------------------
 def CameraSetup(strDevIn):
 	try:
-		import cv2 as cv 
 		cam = cv.VideoCapture(0)
 		ret, frame = cam.read()
 		if ret == True:
@@ -148,7 +148,7 @@ if "AUDIO" in strDevIn:
 
 #bluetooth properties
 if "BLUETOOTH" in strDevIn:
-
+	print("bluetooth")
 
 
 #-----------------------------------------------------------------------
@@ -164,8 +164,13 @@ while True:
 			boolOnState = True
 		if GPIO.event_detected(switch, GPIO.FALLING):
 			boolOnState = False
-	if "BLUETOOTH" in strDevIn:
+	else:
+		boolOnState = False
 
+	print(boolOnState)
+	
+	if "BLUETOOTH" in strDevIn:
+		print("")
 
 	if boolOnState == True:
 		if "CAMERA" in strDevIn:
@@ -201,7 +206,8 @@ while True:
 	
 		if "BLUETOOTH" in strDevIn:
 			#do bluetooth stuff plz
-	
+			print("")
+			
 		if "SENSE-HAT" in strDevIn:
 			#output colour to sense hat LED matrix
 			sh.set_pixels(backLight)
