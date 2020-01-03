@@ -1,10 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import numpy as np
-import cv2 as cv 
 
-
-#initialise the device list 
 strDevIn = ""
+
 #-----------------------------------------------------------------------
 #      	bluetooth setup v0.2
 # 		initialises bluetooth while checking if devices are accessable
@@ -16,7 +14,7 @@ def BluetoothSetup(strDevIn):
 		import pybluez
 		strstrDevIn += " BLUETOOTH"
 	except:
-		print("bluetooth library not found")
+		print("Bluetooth setup failed")
 	return strDevIn
 
 #-----------------------------------------------------------------------
@@ -43,7 +41,7 @@ def AudioSetup(strDevIn):
 
 		strDevIn += " AUDIO"
 	except:
-		print("no audio device")
+		print("Audio setup failed")
 	return strDevIn
 
 #-----------------------------------------------------------------------
@@ -71,7 +69,7 @@ def GPIOSetup():
 		greenCh = gpio.PWM(gCh, pwmFreq)
 		blueCh  = gpio.PWM(bCh, pwmFreq)
 	except:
-		print('could not find gpio library')
+		print('GPIO setup failed')
 	return strDevIn
 
 #-----------------------------------------------------------------------
@@ -99,7 +97,7 @@ def SenseHatSetup(strDevIn)
 			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
 			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b]])
 	except:
-		print('could not find senseHat library')
+		print('SenseHat setup failed')
 	return strDevIn
 #-----------------------------------------------------------------------
 #      	Camera setup v0.1
@@ -108,10 +106,15 @@ def SenseHatSetup(strDevIn)
 #		Author: AH
 #-----------------------------------------------------------------------
 def CameraSetup(strDevIn):
-	cam = cv.VideoCapture(0)
-	ret, frame = cam.read()
-	if ret == True:
-		strDevIn += " CAMERA"
+	try:
+		import cv2 as cv 
+		cam = cv.VideoCapture(0)
+		ret, frame = cam.read()
+		if ret == True:
+			strDevIn += " CAMERA"
+	except:
+		print("Camera setup failed")
+
 	return strDevIn
 
 #-----------------------------------------------------------------------
@@ -141,7 +144,7 @@ if "AUDIO" in devIn:
 	intAlias = int(16777215/intAudioRange)
 
 #-----------------------------------------------------------------------
-#      	Main v0.1
+#      	Main v0.3
 # 		Main body for control software
 #		started: 17/12/2019 updated: 03/01/2020
 #		Author: AH
