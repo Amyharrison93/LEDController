@@ -281,7 +281,7 @@ def Setup(strDevIn, arryKnownDevice):
 #-----------------------------------------------------------------------
 #      	Main v0.3
 # 		Main body for control software
-#		started: 17/12/2019 updated: 03/01/2020
+#		started: 17/12/2019 updated: 07/01/2020
 #		Author: AH
 #-----------------------------------------------------------------------
 def main(args):
