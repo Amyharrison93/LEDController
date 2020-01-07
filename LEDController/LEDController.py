@@ -268,7 +268,6 @@ def Setup(strDevIn, arryKnownDevice):
 	#audio properties 20 Hz - 20KHz to Hex
 	if "AUDIO" in strDevIn:
 		intAudioRange = 20000 - 20
-		intAlias = int(16777215/intAudioRange)
 
 	#bluetooth properties
 	if "BLUETOOTH" in strDevIn:
@@ -321,14 +320,17 @@ def main(args):
 			if "AUDIO" in strDevIn:
 				#read audio device
 				inAaudio = stream.read(CHUNK)
+				
+				#filter into R, G, B values
+				r = HighPass(inAudio) >> 32
+				g = MidPass(inAudio) >> 16
+				b = LowPass(inAudio) >> 0
 
-				hexColour = inAudio%intAlias
-				#convert hex to RGB
-	
+				hexColour = HighPass(inAudio) | MidPass(inAudio) | LowPass(inAudio)
 
 			if "GPIO" in strDevIn:
 				#pwm for analogue output (this is probably not correct)
-				redCh.start(100)
+				redCh.start(1)
 				greenCh.start(1)
 				blueCh.start(1)
 
