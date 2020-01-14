@@ -117,15 +117,43 @@ def BluetoothSetup(strDevIn, arryKnownDevice):
 	return strDevIn
 
 #-----------------------------------------------------------------------
-#      	bluetooth connect to device v0.1
-# 		connects to discovered device
+#      	Bluetooth communication server v0.1
+# 		communicate information over bluetooth as server
+#		started: 13/01/2020 updated: 
+#		Author: AH
+#-----------------------------------------------------------------------
+def BtCommunicateServer(strMessage, intPort = 1):
+	#set socket status
+	socket = bt.BluetoothSocket(bt.RFCOMM)
+	socket.bind(("", intPort))
+	socket.listen(1)
+
+	#find client details 
+	strClientSock, strAddress = socket.accept()
+
+	#receive message from client
+	strMessage = socket.recv(1024)
+
+	return strMessage
+
+#-----------------------------------------------------------------------
+#      	bluetooth Communication Client v0.1
+# 		connects to discovered device as a client
 #		started: 07/01/2020
 #		Comp tested:
 #		Author: AH
 #-----------------------------------------------------------------------
-def BluetootConnect():
-		
-	socketServer.bind(("",port))
+def BluetootConnectClient(strMessage, strAddress , intPort = 1):
+	#convert input to string
+	strMessage = str(strMessage)
+	#set socket status
+	socket = bt.BluetoothSocket(bt.RFCOMM)
+	socket.connect((strAddress, intPort))
+	#send string to device
+	socket.send(strMessage)
+	#close socket connection
+	socket.close()
+
 	return strDevIn
 
 #-----------------------------------------------------------------------
@@ -276,10 +304,8 @@ def main(args):
 
 		#bluetooth on/off flag
 		if("BLUETOOTH" in strDevIn):
-			if GPIO.event_detected(switch, GPIO.RISING):
-				boolOnState = True
-			if GPIO.event_detected(switch, GPIO.FALLING):
-				boolOnState = False
+			#check bluetooth packet
+			boolOnState != boolOnState
 		else:
 			boolOnState = False
 
@@ -300,7 +326,7 @@ def main(args):
 					r = int(np.mean(frame[:,:,2]))
 
 					#shift bits to make hex value
-					hexColour = r << 32 | g << 16 | b << 0
+					hexCamColour = r << 32 | g << 16 | b << 0
 
 				if("AUDIO" in strDevIn) and ("AUDIO" in strDevFlag):
 					#read audio device
@@ -311,7 +337,7 @@ def main(args):
 					g = MidPass(inAudio) >> 16
 					b = LowPass(inAudio) >> 0
 
-					hexColour = HighPass(inAudio) | MidPass(inAudio) | LowPass(inAudio)
+					hexAudioColour = HighPass(inAudio) | MidPass(inAudio) | LowPass(inAudio)
 
 				if "GPIO" in strDevIn:
 					#change the duty cycle for different colours
