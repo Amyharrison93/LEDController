@@ -191,36 +191,6 @@ def GPIOSetup(strDevIn):
 	return strDevIn
 
 #-----------------------------------------------------------------------
-#      	sense Hat setup v0.2
-# 		initialises the sense hat while checking if 
-# 		devices are accessable
-#		started: 17/12/2019 updated: 03/01/2020
-#		comp tested:
-#		Author: AH
-#-----------------------------------------------------------------------
-def SenseHatSetup(strDevIn):
-	try:
-		from sense_hat import SenseHat
-		sh = SenseHat()
-		sh.clear
-		
-		gpioActive = False
-		r,g,b = 0,0,0
-		backLight = np.array([
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-			[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b]])
-		strDevIn += " SENSE-HAT"
-		print("SENSE-HAT setup Seccess")
-	except:
-		print('SenseHat setup failed')
-	return strDevIn
-#-----------------------------------------------------------------------
 #      	Camera setup v0.1
 # 		initialises camera and checks for connection 
 #		started: 03/01/2020 updated:
@@ -256,7 +226,6 @@ def Setup(strDevIn, arryKnownDevice):
 	strDevIn = BluetoothSetup(strDevIn, arryKnownDevice)
 	strDevIn = AudioSetup(strDevIn)
 	strDevIn = GPIOSetup(strDevIn)
-	strDevIn = SenseHatSetup(strDevIn)
 	strDevIn, cam = CameraSetup(strDevIn)
 	print("Startup finished devices available: {}".format(strDevIn))
 
@@ -288,83 +257,81 @@ def main(args):
 	print("Entering Main")
 	#start service
 	arryDevice = "D4:11:A3:96:D0:AA", "What's a phone"
+	arryLED ="","CMD656TVT2"
 	strDevIn, intAlias, arryBlank = Setup("", arryDevice)
+
+	strDevFlag = "AUDIO"
+	strOutFlag = "BLUETOOTH"
 
 	#start main loop
 	while True:
-		#on, off flag
-		if "GPIO" in strDevIn:
+		#hardware on/off flag
+		if("GPIO" in strDevIn):
 			if GPIO.event_detected(switch, GPIO.RISING):
 				boolOnState = True
 			if GPIO.event_detected(switch, GPIO.FALLING):
 				boolOnState = False
 		else:
 			boolOnState = False
-	
-		if "BLUETOOTH" in strDevIn:
-			print("")
 
-		if boolOnState == True:
-			if "CAMERA" in strDevIn:
-				#read frame and split colour channels
-				ret, frame = cam.read()
+		#bluetooth on/off flag
+		if("BLUETOOTH" in strDevIn):
+			if GPIO.event_detected(switch, GPIO.RISING):
+				boolOnState = True
+			if GPIO.event_detected(switch, GPIO.FALLING):
+				boolOnState = False
+		else:
+			boolOnState = False
 
-				#average colour channels
-				b = int(np.mean(frame[:,:,0]))
-				g = int(np.mean(frame[:,:,1]))
-				r = int(np.mean(frame[:,:,2]))
-
-				#shift bits to make hex value
-				hexColour = r << 32 | g << 16 | b << 0
-
-			if "AUDIO" in strDevIn:
-				#read audio device
-				inAaudio = stream.read(CHUNK)
-				
-				#filter into R, G, B values
-				r = HighPass(inAudio) >> 32
-				g = MidPass(inAudio) >> 16
-				b = LowPass(inAudio) >> 0
-
-				hexColour = HighPass(inAudio) | MidPass(inAudio) | LowPass(inAudio)
-
-			if "GPIO" in strDevIn:
-				#pwm for analogue output (this is probably not correct)
-				redCh.start(1)
-				greenCh.start(1)
-				blueCh.start(1)
-
-				#change the duty cycle for different colours
-				redCh.ChangeDutyCycle(r)
-				greenCh.ChangeDutyCycle(g)
-				blueCh.ChangeDutyCycle(b)
-	
-			if "BLUETOOTH" in strDevIn:
-				#do bluetooth stuff plz
+		#check if on 
+		if boolOnState == true:
+			if("BLUETOOTH" in strDevIn):
+				#check connection with host
 				print("")
-			
-			if "SENSE-HAT" in strDevIn:
-				#output colour to sense hat LED matrix
-				sh.set_pixels(backLight)
-				backLight = np.array([
-					[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-					[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-					[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-					[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-					[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-					[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-					[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],
-					[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b],[r,g,b]])
+
+			if boolOnState == True:
+				if "CAMERA" in strDevIn:
+					#read frame and split colour channels
+					ret, frame = cam.read()
+
+					#average colour channels
+					b = int(np.mean(frame[:,:,0]))
+					g = int(np.mean(frame[:,:,1]))
+					r = int(np.mean(frame[:,:,2]))
+
+					#shift bits to make hex value
+					hexColour = r << 32 | g << 16 | b << 0
+
+				if("AUDIO" in strDevIn) and ("AUDIO" in strDevFlag):
+					#read audio device
+					inAaudio = stream.read(CHUNK)
+				
+					#filter into R, G, B values
+					r = HighPass(inAudio) >> 32
+					g = MidPass(inAudio) >> 16
+					b = LowPass(inAudio) >> 0
+
+					hexColour = HighPass(inAudio) | MidPass(inAudio) | LowPass(inAudio)
+
+				if "GPIO" in strDevIn:
+					#change the duty cycle for different colours
+					redCh.ChangeDutyCycle(r)
+					greenCh.ChangeDutyCycle(g)
+					blueCh.ChangeDutyCycle(b)
 	
-			#troubleshooting only, not required for runtime (will likely fail in headless)
-			try:
-				backlight = cv.merge((blank+b, blank+g, blank+r))
-				cv.imshow('image frame', frame)
-				cv.imshow('backlight', backlight)
-			except:
-				print("Cannot show troubleshooting")
-			print("loop complete")
-		#adjust for higher/lower bitrates 
+				if "BLUETOOTH" in strDevIn:
+					#do bluetooth stuff plz
+					print("")
+	
+				#troubleshooting only, not required for runtime (will likely fail in headless)
+				try:
+					backlight = cv.merge((blank+b, blank+g, blank+r))
+					cv.imshow('image frame', frame)
+					cv.imshow('backlight', backlight)
+				except:
+					print("Cannot show troubleshooting")
+				print("loop complete")
+			#adjust for higher/lower bitrates 
 		cv.waitKey(1)
 	return 0
 
