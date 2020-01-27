@@ -30,6 +30,42 @@
   <ItemGroup>
     <InterpreterReference Include="Global|PythonCore|3.7" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Camera\" />
+    <Folder Include="RaspberryPi\" />
+    <Folder Include="Peripheral\" />
+    <Folder Include="Bluetooth\" />
+    <Folder Include="Audio\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Audio\AudioSetup.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Audio\BandPassFilter.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Audio\LowPassFilter.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Audio\HighPassFilter.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Bluetooth\BluetoothClientConnect.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Bluetooth\BluetoothServerCommunicate.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Bluetooth\BluetoothSetup.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Peripheral\RpiGPIOSetup.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="RaspberryPi\RaspotifySetup.py">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in
        Visual Studio and specify your pre- and post-build commands in
